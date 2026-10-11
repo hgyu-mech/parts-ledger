@@ -36,6 +36,10 @@ Genuine PayPal OAuth and Invoicing v2 calls created and issued three distinct Sa
 
 The suite passes 39 tests, including 1,500 randomized cent allocations, and the browser script passes its syntax check. Checks cover preserved source values, ambiguous model input, review overrides, stale edits, lost-response recovery, safe diagnostics, send/GET status preservation, session isolation and rejected live endpoints. Offline demonstrations remain explicitly labelled as fixtures, with simulated payment confined to that mode.
 
+## Challenges during integration
+
+A Sandbox send failure surfaced as a generic media-type error. Inspecting its protocol issue revealed a Korean merchant–Korean buyer restriction. Retesting with generated US buyers produced three provider-confirmed SENT invoices. The adapter now retains useful issue codes while removing addresses and token-like values from diagnostics. This also reinforced the separation between source data, reviewed decisions and provider state: an uncertain response must remain unresolved until it is checked.
+
 ## Scope and next steps
 
 The prototype supports typed English receipts, three members and USD. The next steps are receipt-image extraction and a larger, independently evaluated parts dataset. The current demonstration establishes the reviewed source-to-invoice workflow; real-team outcomes have not been measured.
