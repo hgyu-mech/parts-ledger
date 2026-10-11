@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-11",
+  "submission_status": "submitted",
+  "submission_progress": "5/5",
+  "urls": {
+    "entry": "https://devpost.com/software/parts-ledger",
+    "video": "https://youtu.be/wdOwUvXQrYE",
+    "repo": "https://github.com/hgyu-mech/parts-ledger",
+    "release": "https://github.com/hgyu-mech/parts-ledger/releases/tag/v0.1.0",
+    "test_build": "https://github.com/hgyu-mech/parts-ledger/releases/download/v0.1.0/parts-ledger-v0.1.0.zip"
+  },
+  "release_source_commit": "71b3341554767b3bb00e2b68c47455cd216081ea",
+  "release_zip_sha256": "fc063308c75e4a18622c3428db3008e3ba26e6d9fb1cd3813d5023178021f3c0"
+}

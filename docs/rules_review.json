@@ -18,5 +18,6 @@
     "Free judge access through the end of judging, December 15, 2026"
   ],
   "implementation_interpretation": "AI-assisted coding alone is insufficient. Our runtime classifier is trained statistical ML and actively produces review suggestions. Fixture PayPal responses do not prove Sandbox integration; real Sandbox credentials and execution must be verified separately.",
-  "submission_not_performed": true
+  "submission_not_performed": false,
+  "submission_url": "https://devpost.com/software/parts-ledger"
 }
