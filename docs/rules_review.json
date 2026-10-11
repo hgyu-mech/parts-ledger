@@ -1,0 +1,22 @@
+{
+  "checked_date": "2026-10-11",
+  "sources": {
+    "rules": "https://paypalaihackathon.devpost.com/rules",
+    "resources": "https://paypalaihackathon.devpost.com/resources",
+    "sandbox": "https://developer.paypal.com/sandbox-testing/overview",
+    "authentication": "https://developer.paypal.com/api/rest/authentication/",
+    "invoicing_spec": "https://developer.paypal.com/api/invoicing/v2/schema.json"
+  },
+  "eligibility": "Local age of majority required. South Korea is not listed among prohibited locations; conflict-of-interest exclusions still apply.",
+  "deadline": {"pacific": "2026-11-12T12:00:00-08:00", "korea": "2026-11-13T05:00:00+09:00"},
+  "required": [
+    "Working application meaningfully using PayPal's free Sandbox and an AI tool/model in its functionality",
+    "Public GitHub/GitLab/Bitbucket repository with all source, run instructions and detectable open-source LICENSE",
+    "A functional hosted demo OR complete setup instructions; static mockups do not qualify",
+    "Public YouTube demonstration under 3 minutes, showing the application functioning",
+    "English submission, instructions and video or English translations",
+    "Free judge access through the end of judging, December 15, 2026"
+  ],
+  "implementation_interpretation": "AI-assisted coding alone is insufficient. Our runtime classifier is trained statistical ML and actively produces review suggestions. Fixture PayPal responses do not prove Sandbox integration; real Sandbox credentials and execution must be verified separately.",
+  "submission_not_performed": true
+}

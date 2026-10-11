@@ -1,0 +1,273 @@
+{
+  "checked_at_utc": "2026-10-11T03:57:25.012401+00:00",
+  "evidence_scope": "Actual PayPal Sandbox create, issue, GET status reads and buyer-page inspection; typed synthetic plotter receipt and generated Sandbox buyers. No buyer payment or live transaction.",
+  "verification_method": "Cross-check of the actual application-export download against expected invoice IDs, integer-cent totals, payload source IDs, source checksums and recorded API-origin audit events. Buyer-page observation is from the actual UI capture reviewed by the project maintainer.",
+  "sandbox_configuration": {
+    "merchant_market": "KR",
+    "generated_buyer_market": "US",
+    "api_host": "https://api-m.sandbox.paypal.com"
+  },
+  "export_sha256": "77a68749ad74acf2d4a21546ec42c01c9fbe18466dde764239f4489a088b5c9d",
+  "export_bytes": 28408,
+  "currency": "USD",
+  "amount_checks": {
+    "original_receipt_cents": 11295,
+    "excluded_duplicate_cents": 280,
+    "reviewed_billable_cents": 11015,
+    "invoice_total_cents": 11015,
+    "unallocated_cents": 0,
+    "each_invoice_payload_matches_share": true,
+    "distinct_provider_ids": true,
+    "original_row_amounts_preserved": true,
+    "all_eight_source_rows_reviewed": true,
+    "excluded_source_id": "L08",
+    "excluded_row_absent_from_invoices": true,
+    "each_original_receipt_row_matches_retained_item": true
+  },
+  "invoices": [
+    {
+      "member_alias": "alex",
+      "provider_id": "INV2-9HT5-JLGT-7DCC-VM3R",
+      "amount_cents": 5258,
+      "currency": "USD",
+      "status": "SENT",
+      "mode": "sandbox",
+      "source_items": [
+        {
+          "source_id": "L01",
+          "allocated_cents": 3694
+        },
+        {
+          "source_id": "L02",
+          "allocated_cents": 1257
+        },
+        {
+          "source_id": "L03",
+          "allocated_cents": 94
+        },
+        {
+          "source_id": "L07",
+          "allocated_cents": 213
+        }
+      ]
+    },
+    {
+      "member_alias": "mina",
+      "provider_id": "INV2-BEDE-9S4L-D2M8-SCE3",
+      "amount_cents": 3269,
+      "currency": "USD",
+      "status": "SENT",
+      "mode": "sandbox",
+      "source_items": [
+        {
+          "source_id": "L03",
+          "allocated_cents": 93
+        },
+        {
+          "source_id": "L05",
+          "allocated_cents": 1273
+        },
+        {
+          "source_id": "L06",
+          "allocated_cents": 1691
+        },
+        {
+          "source_id": "L07",
+          "allocated_cents": 212
+        }
+      ]
+    },
+    {
+      "member_alias": "jules",
+      "provider_id": "INV2-CNP3-CJA3-5K3N-CJ9L",
+      "amount_cents": 2488,
+      "currency": "USD",
+      "status": "SENT",
+      "mode": "sandbox",
+      "source_items": [
+        {
+          "source_id": "L03",
+          "allocated_cents": 93
+        },
+        {
+          "source_id": "L04",
+          "allocated_cents": 2183
+        },
+        {
+          "source_id": "L07",
+          "allocated_cents": 212
+        }
+      ]
+    }
+  ],
+  "verified_operations": {
+    "draft_creations": 3,
+    "invoice_sends": 3,
+    "post_send_gets_returning_sent": 3,
+    "separate_alex_refresh_get_returning_sent": 1,
+    "total_remote_call_count": null
+  },
+  "buyer_page_observation": {
+    "member_alias": "alex",
+    "due_cents": 5258,
+    "source_ids": [
+      "L01",
+      "L02",
+      "L03",
+      "L07"
+    ],
+    "payment_completed": false,
+    "paid_status_verified": false
+  },
+  "source_checksums_sha256": {
+    "receipt": "1a00ba1852b1113ca842b178fe7bb3b9f9b508ef0d991d341d25c9145d24f963",
+    "bom": "ca6492261b9975bde2cd24255e725dc81e5a736969d495bd884a0159f96656e0"
+  },
+  "source_checksum_matches_import_audit": true,
+  "audit_event_count": 13,
+  "audit_kind_counts": {
+    "source_imported": 1,
+    "part_reviewed": 3,
+    "clear_suggestions_confirmed": 1,
+    "member_details_updated": 1,
+    "invoice_draft_created": 3,
+    "invoice_status_changed": 3,
+    "invoice_status_checked": 1
+  },
+  "sanitized_audit": [
+    {
+      "time_utc": "2026-10-11T03:49:32+00:00",
+      "kind": "source_imported",
+      "lines": 8,
+      "receipt_sha256": "1a00ba1852b1113ca842b178fe7bb3b9f9b508ef0d991d341d25c9145d24f963",
+      "bom_sha256": "ca6492261b9975bde2cd24255e725dc81e5a736969d495bd884a0159f96656e0",
+      "runtime_model": "local-multinomial-naive-bayes-v1"
+    },
+    {
+      "time_utc": "2026-10-11T03:49:44+00:00",
+      "kind": "part_reviewed",
+      "source_id": "L08",
+      "source_line": 9,
+      "original_model_category": "fastener"
+    },
+    {
+      "time_utc": "2026-10-11T03:49:55+00:00",
+      "kind": "part_reviewed",
+      "source_id": "L02",
+      "source_line": 3,
+      "original_model_category": "drive"
+    },
+    {
+      "time_utc": "2026-10-11T03:49:56+00:00",
+      "kind": "part_reviewed",
+      "source_id": "L07",
+      "source_line": 8,
+      "original_model_category": "electronics"
+    },
+    {
+      "time_utc": "2026-10-11T03:49:57+00:00",
+      "kind": "clear_suggestions_confirmed",
+      "human_confirmation": true,
+      "source_ids": [
+        "L01",
+        "L03",
+        "L04",
+        "L05",
+        "L06"
+      ]
+    },
+    {
+      "time_utc": "2026-10-11T03:51:01+00:00",
+      "kind": "member_details_updated",
+      "member_ids": [
+        "alex",
+        "mina",
+        "jules"
+      ]
+    },
+    {
+      "time_utc": "2026-10-11T03:51:04+00:00",
+      "kind": "invoice_draft_created",
+      "member_id": "alex",
+      "invoice_id": "INV2-9HT5-JLGT-7DCC-VM3R",
+      "amount_cents": 5258,
+      "mode": "sandbox"
+    },
+    {
+      "time_utc": "2026-10-11T03:51:05+00:00",
+      "kind": "invoice_draft_created",
+      "member_id": "mina",
+      "invoice_id": "INV2-BEDE-9S4L-D2M8-SCE3",
+      "amount_cents": 3269,
+      "mode": "sandbox"
+    },
+    {
+      "time_utc": "2026-10-11T03:51:06+00:00",
+      "kind": "invoice_draft_created",
+      "member_id": "jules",
+      "invoice_id": "INV2-CNP3-CJA3-5K3N-CJ9L",
+      "amount_cents": 2488,
+      "mode": "sandbox"
+    },
+    {
+      "time_utc": "2026-10-11T03:51:29+00:00",
+      "kind": "invoice_status_changed",
+      "member_id": "alex",
+      "mode": "sandbox",
+      "source": "PayPal Sandbox response",
+      "before": "DRAFT",
+      "after": "SENT"
+    },
+    {
+      "time_utc": "2026-10-11T03:51:56+00:00",
+      "kind": "invoice_status_changed",
+      "member_id": "mina",
+      "mode": "sandbox",
+      "source": "PayPal Sandbox response",
+      "before": "DRAFT",
+      "after": "SENT"
+    },
+    {
+      "time_utc": "2026-10-11T03:52:50+00:00",
+      "kind": "invoice_status_changed",
+      "member_id": "jules",
+      "mode": "sandbox",
+      "source": "PayPal Sandbox response",
+      "before": "DRAFT",
+      "after": "SENT"
+    },
+    {
+      "time_utc": "2026-10-11T03:53:34+00:00",
+      "kind": "invoice_status_checked",
+      "member_id": "alex",
+      "mode": "sandbox",
+      "source": "PayPal Sandbox response",
+      "before": "SENT",
+      "after": "SENT"
+    }
+  ],
+  "current_source_sha256": {
+    "server.py": "d3d46351d5b5886f4c66b5d2aceb01fe2fb288152d48274a82c7d09e194a3c8b",
+    "model.py": "316429e0ef1335f0a46a53482ea0e405f3c6e0cec5116daadc9b52117b3ac5ea",
+    "ledger.py": "4f9a76f969f9e5f5c18dbd76820eda7e53bb9641ced999acb9730ce1e1c9c6e6",
+    "paypal_adapter.py": "24bb5cf2a73121c365e6580b181cad6d230be80639889acf5c8ff0bc3494f5a8",
+    "fixtures.py": "77a30580090b700c6b64109d12a70e44551c7886919ad7f7a3565e3f6c89c37d",
+    "training_data.json": "78f024be408f25a434df9a499af37dad7bbbc61757c8894298a4ad348bc30eb3",
+    "web/index.html": "6bf58cc5ddc490ae67ffe1fe6e00a3684a5b9b6d8fdf8ebe517ed8e70fbae992",
+    "web/style.css": "a5505179372a8b8e52665d0e3077b4453ec85b9d94a8d9b6dba99298e4a7ab0e",
+    "web/app.js": "c97593db8327defe4b38aaa1d72ca1d50b40c0f8ec4e59b9ccbde03906ab0412",
+    "tests/test_parts_ledger.py": "92638370c1eaacd1cc490668d502a31c9a2bcde8c176b54155a51bb7b364a4c4"
+  },
+  "capture_sha256": {
+    "qa/08-actual-sandbox-drafts.jpg": "0d1e67309e336191e4ccc06d2ce1c77de79950377cfc859bc3995103aa70c68d",
+    "qa/10-actual-sandbox-sent.jpg": "311bfa738eb28eabad1b3e62cb9588640aa453b499c481162bba98e6ca676c2e",
+    "qa/11-paypal-buyer-invoice.jpg": "fba09f92aca8b96ed6374dc4bc0a2807a05d4c47456c5425d8f948f61c7bfecd",
+    "qa/11b-paypal-source-items.jpg": "d0ab9953ce050935174ec4aac0222e45b7c5eed99a240d1d558d16fdfdda44e1",
+    "qa/12-activity-and-export.jpg": "c2fdcafd32dcda80c68e61642b4f0c411a8dbf445cfcd9a734469f23b73025a7",
+    "qa/06-exact-cost-split.jpg": "9dfcbfba0b854cff8efbb07107111a230d85d0e45f824ef4b4079ee249a69700",
+    "docs/images/reviewed-split.jpg": "9dfcbfba0b854cff8efbb07107111a230d85d0e45f824ef4b4079ee249a69700"
+  },
+  "redaction_scope": "Only allowlisted fields retained. Workspace/project IDs, audit IDs, request IDs, invoice-number references, buyer links, recipient emails, credentials, session values and local user paths are excluded.",
+  "limitations": "SENT is an issued invoice status, not proof of payment. No real purchase, user savings, revenue, PAID result or live payment was measured. Local mock and fixture results remain separate in docs/verification.json.",
+  "source_snapshot_scope": "Final source snapshot including email-card ellipsis/title and approve-clear toast-count presentation polish. The 39-test suite passed before those presentation edits; JavaScript syntax passed after them."
+}

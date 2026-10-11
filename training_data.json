@@ -1,0 +1,32 @@
+{
+  "description": "Original, hand-labelled synthetic makerspace descriptions. No scraped receipts or personal information.",
+  "training": {
+    "drive": ["NEMA17 stepper motor", "NEMA23 stepper motor with shaft", "GT2 timing belt loop", "GT2 aluminium timing pulley", "608 deep groove ball bearing", "linear motion bearing block", "steel drive shaft", "flexible motor shaft coupling", "gearbox reduction gear", "DC geared motor", "lead screw and nut", "linear rail carriage", "idler pulley bearing", "rubber drive belt", "servo actuator gearbox", "precision linear guide rail", "motor mounting bracket", "rotary shaft encoder coupling", "idler roller wheel", "ball screw drive assembly"],
+    "fastener": ["M3 socket head cap screw", "M4 stainless hex bolt", "M5 nyloc lock nut", "M3 brass threaded insert", "M6 flat washer", "M4 spring washer", "M3 pan head machine screw", "M8 hexagonal nut", "stainless countersunk screw", "threaded fastener assortment", "M5 carriage bolt", "M3 socket set screw", "rivet nut fastener", "hex bolt and washer", "M2 small machine screw", "M4 button head bolt", "M3 T slot nut", "M5 locking nut", "self tapping screw", "M6 threaded stud"],
+    "electronics": ["Arduino Nano controller board", "ESP32 development board", "2200mAh LiPo battery", "24V power supply", "stepper motor driver board", "breadboard jumper wires", "USB data cable", "limit switch sensor", "rotary encoder sensor", "LED resistor kit", "DC voltage regulator module", "lithium battery charger", "soldered PCB circuit board", "temperature sensor probe", "microcontroller prototype board", "motor driver electronic module", "terminal block connector", "capacitor resistor assortment", "OLED display module", "logic level converter"],
+    "fabrication": ["6061 aluminium plate", "aluminium extrusion profile", "acrylic sheet panel", "laser cut plywood sheet", "PETG filament spool", "PLA 3D printing filament", "steel sheet stock", "MDF board panel", "carbon fibre tube", "polycarbonate panel", "CNC machined mounting plate", "3D printed enclosure", "laser cut acrylic panel", "aluminium round stock", "brass rod stock", "ABS plastic sheet", "birch plywood panel", "nylon printed bracket", "aluminium structural beam", "PETG printed housing"],
+    "consumables": ["masking tape roll", "electrical insulation tape", "sandpaper abrasive sheet", "epoxy adhesive glue", "cyanoacrylate glue bottle", "cutting oil lubricant", "solder wire spool", "heat shrink tubing", "cable tie pack", "safety glove pair", "microfibre cleaning cloth", "isopropyl cleaning solvent", "grease lubricant tube", "double sided adhesive tape", "protective safety goggles", "abrasive polishing pad", "disposable nitrile gloves", "duct tape roll", "thread locking adhesive", "workshop cleaning wipes"]
+  },
+  "holdout": [
+    {"description": "stepper motor drive coupling", "category": "drive"},
+    {"description": "linear guide bearing", "category": "drive"},
+    {"description": "GT2 drive pulley", "category": "drive"},
+    {"description": "motor reduction gearbox", "category": "drive"},
+    {"description": "M3 stainless bolt", "category": "fastener"},
+    {"description": "M4 threaded nut", "category": "fastener"},
+    {"description": "socket head washer screw", "category": "fastener"},
+    {"description": "M6 locking fastener", "category": "fastener"},
+    {"description": "ESP32 controller module", "category": "electronics"},
+    {"description": "battery power regulator", "category": "electronics"},
+    {"description": "temperature display sensor", "category": "electronics"},
+    {"description": "PCB terminal connector", "category": "electronics"},
+    {"description": "6061 plate stock", "category": "fabrication"},
+    {"description": "PETG plastic enclosure", "category": "fabrication"},
+    {"description": "acrylic structural panel", "category": "fabrication"},
+    {"description": "plywood machined sheet", "category": "fabrication"},
+    {"description": "adhesive tape pack", "category": "consumables"},
+    {"description": "cleaning glove kit", "category": "consumables"},
+    {"description": "sandpaper polishing abrasive", "category": "consumables"},
+    {"description": "lubricant cutting grease", "category": "consumables"}
+  ]
+}

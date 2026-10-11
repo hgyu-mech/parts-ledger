@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "project": "Parts Ledger",
+  "canvas": {"width": 1920, "height": 1080, "fps": 30},
+  "capture_directory": "qa",
+  "output_directory": "video/rendered",
+  "output_filename": "parts-ledger-demo-160s.mp4",
+  "disclosure": "Working browser demo · captured interaction states",
+  "presentation": "Silent edited sequence of real CUA-captured browser states. Separate editorial captions; no simulated clicks, continuous-recording claim, speed benchmark, or unverified payment claim.",
+  "facts": {
+    "source_receipt_usd": "112.95",
+    "excluded_duplicate_usd": "2.80",
+    "reviewed_total_usd": "110.15",
+    "shares_usd": ["52.58", "32.69", "24.88"],
+    "unallocated_usd": "0.00",
+    "ai": "Local trained multinomial Naive Bayes: category suggestions, not cost decisions",
+    "genuine_sandbox_oauth_succeeded": true,
+    "genuine_sandbox_drafts_created": 3,
+    "genuine_sandbox_invoices_issued": 3,
+    "genuine_sandbox_returned_status": "SENT",
+    "genuine_sandbox_invoice_ids": ["INV2-9HT5-JLGT-7DCC-VM3R", "INV2-BEDE-9S4L-D2M8-SCE3", "INV2-CNP3-CJA3-5K3N-CJ9L"],
+    "sandbox_recipient_country": "US",
+    "alex_separate_refresh_returned_status": "SENT",
+    "buyer_invoice_visible_amount_due_usd": "52.58",
+    "genuine_buyer_payment_verified": false,
+    "ui_ledger_json_export_downloaded": true,
+    "facts_source": "Owner-confirmed genuine Sandbox OAuth, create, send-then-GET and separate Alex refresh. Final real 01–12 and 11b captures; PayPal buyer invoice visibly retains $52.58 amount due. No buyer payment or PAID operation executed."
+  },
+  "scenes": [
+    {
+      "id": "01", "capture_pattern": "01-source-review.jpg", "duration_seconds": 10,
+      "title": "A shared receipt needs decisions.",
+      "caption": "A plotter team shares a cart, but not every part. The original source stays visible while costs are reviewed.",
+      "capture_expected": "Actual synthetic source ledger with four flagged rows and eight pending source decisions",
+      "editorial_fact": "Original synthetic project · typed receipt and bill of materials"
+    },
+    {
+      "id": "02", "capture_pattern": "02-duplicate-decision.jpg", "duration_seconds": 12,
+      "title": "Exclude a duplicate. Preserve its source.",
+      "caption": "The second screw entry is excluded from billing with a reason. Its original $2.80 source row remains in the record.",
+      "capture_expected": "Actual duplicate-row review with exclusion and entered reason",
+      "editorial_fact": "Receipt amount and reviewed billing decision remain distinct"
+    },
+    {
+      "id": "03", "capture_pattern": "03-spare-decision.jpg", "duration_seconds": 12,
+      "title": "An extra belt needs an explanation.",
+      "caption": "The BOM requests two belts; the receipt contains three. The reviewer records the spare's purpose and cost owner.",
+      "capture_expected": "Actual extra belt source comparison and reviewed spare reason",
+      "editorial_fact": "Source checks flag a difference; the model does not invent a purchase explanation"
+    },
+    {
+      "id": "04", "capture_pattern": "04-uncertain-model.jpg", "duration_seconds": 16,
+      "title": "A model suggestion is not a cost decision.",
+      "caption": "The local trained model is uncertain about Bench tidy kit. Its original category, score and supporting term are inspectable.",
+      "capture_expected": "Actual 40% electronics suggestion for the ambiguous source item",
+      "editorial_fact": "Statistical text classifier · displayed scores are uncalibrated"
+    },
+    {
+      "id": "05", "capture_pattern": "05-model-override.jpg", "duration_seconds": 14,
+      "title": "Correct the suggestion. Keep the evidence.",
+      "caption": "The reviewer chooses Shop supplies, all three members and a reason. The original model output remains visible.",
+      "capture_expected": "Actual category override, selected owners and entered review reason",
+      "editorial_fact": "The model suggests; the reviewer confirms the category and cost owners"
+    },
+    {
+      "id": "06", "capture_pattern": "06-exact-cost-split.jpg", "duration_seconds": 18,
+      "title": "Every reviewed cent has an owner.",
+      "caption": "$112.95 minus the $2.80 exclusion gives $110.15: Alex $52.58, Mina $32.69, Jules $24.88. Unallocated: $0.00.",
+      "capture_expected": "Actual named member shares, original receipt total, reviewed total, excluded amount and completed 8/8 source review",
+      "editorial_fact": "Integer-cent allocation · source IDs retained on each share"
+    },
+    {
+      "id": "07", "capture_pattern": "07-draft-confirmation.jpg", "duration_seconds": 12,
+      "title": "Confirm recipients before creating drafts.",
+      "caption": "A separate confirmation shows the three generated Sandbox recipients and their reviewed amounts.",
+      "capture_expected": "Actual recipient/amount confirmation before remote draft creation",
+      "editorial_fact": "Sandbox test accounts only · credentials stay on the server"
+    },
+    {
+      "id": "08", "capture_pattern": "08-actual-sandbox-drafts.jpg", "duration_seconds": 14,
+      "title": "Three genuine PayPal Sandbox drafts.",
+      "caption": "OAuth and invoice creation succeeded against PayPal Sandbox. These actual INV2 draft IDs match the reviewed shares.",
+      "capture_expected": "Actual three returned INV2 drafts: $52.58, $32.69 and $24.88",
+      "editorial_fact": "DRAFT is not issued or paid · no offline fixture substitution"
+    },
+    {
+      "id": "09", "capture_pattern": "09-issue-confirmation.jpg", "duration_seconds": 10,
+      "title": "Issuing is a separate decision.",
+      "caption": "The invoice amount and recipient are confirmed again before the Sandbox issue request.",
+      "capture_expected": "Actual separate issue confirmation dialog",
+      "editorial_fact": "An issued invoice is still not a buyer payment"
+    },
+    {
+      "id": "10", "capture_pattern": "10-actual-sandbox-sent.jpg", "duration_seconds": 12,
+      "title": "Read the provider's actual response.",
+      "caption": "PayPal Sandbox returned SENT for all three invoices. A separate refresh for Alex also returned SENT; buyer payment has not occurred.",
+      "capture_expected": "Actual three returned SENT invoices and separate refreshed-status confirmation",
+      "editorial_fact": "Actual provider status: SENT · test invoices remain unpaid"
+    },
+    {
+      "id": "11", "capture_pattern": "11-paypal-buyer-invoice.jpg", "duration_seconds": 7,
+      "title": "Inspect the Sandbox invoice itself.",
+      "caption": "PayPal's buyer page shows Alex's invoice, issued October 11, with $52.58 still due. Payment buttons have not been used.",
+      "capture_expected": "Actual PayPal Sandbox buyer invoice top: issued 2026.10.11 and amount due US$52.58",
+      "editorial_fact": "Korean labels: invoice · issued date · amount due · no live money moved"
+    },
+    {
+      "id": "11b", "capture_pattern": "11b-paypal-source-items.jpg", "duration_seconds": 7,
+      "title": "The reviewed source reaches PayPal.",
+      "caption": "The motor, belt, screw and kit retain source IDs L01, L02, L03 and L07 on the invoice. Their shares total $52.58.",
+      "capture_expected": "Actual PayPal Sandbox buyer invoice source items, source IDs and US$52.58 subtotal/total",
+      "editorial_fact": "Reviewed shares: $36.94 + $12.57 + $0.94 + $2.13 = $52.58"
+    },
+    {
+      "id": "12", "capture_pattern": "12-activity-and-export.jpg", "duration_seconds": 16,
+      "title": "Trace the invoice back to the decision.",
+      "caption": "Activity retains draft-to-SENT changes and Alex's SENT-to-SENT refresh with its provider source. The ledger can be exported as JSON.",
+      "capture_expected": "Actual activity view with expanded Alex SENT-to-SENT PayPal Sandbox response record and Export ledger button",
+      "editorial_fact": "Parts Ledger · a source, a reviewed share, a traceable invoice"
+    }
+  ]
+}

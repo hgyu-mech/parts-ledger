@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f7f6f2"><meta name="description" content="Review workshop parts, split shared costs and track PayPal Sandbox invoices.">
+  <title>Parts Ledger — Workshop costs, accounted for</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css"><script src="app.js" defer></script>
+</head>
+<body>
+<svg class="icon-defs" aria-hidden="true"><defs>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.2"/><rect x="14" y="3" width="7" height="7" rx="1.2"/><rect x="3" y="14" width="7" height="7" rx="1.2"/><rect x="14" y="14" width="7" height="7" rx="1.2"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h5"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+<symbol id="i-tool" viewBox="0 0 24 24"><path d="m4 20 8-8M14 4a6 6 0 0 0-3 8 6 6 0 0 0 8 2l-5-5z"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v13m-5-5 5 5 5-5M4 17v4h16v-4"/></symbol>
+</defs></svg>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="Parts Ledger home"><img src="favicon.svg" alt="" width="32" height="32"><span>parts<span class="brand-light">ledger</span></span></a>
+    <div class="space-label">WORKSHOP 07</div>
+    <nav class="side-nav" aria-label="Workspace">
+      <button data-view="review" class="nav-item active"><svg><use href="#i-grid"/></svg>Parts &amp; review <span id="nav-pending" class="nav-count">8</span></button>
+      <button data-view="split" class="nav-item"><svg><use href="#i-tool"/></svg>Cost split</button>
+      <button data-view="invoices" class="nav-item"><svg><use href="#i-doc"/></svg>Invoices</button>
+      <button data-view="activity" class="nav-item"><svg><use href="#i-clock"/></svg>Activity</button>
+    </nav>
+    <div class="sidebar-bottom"><button id="model-info" class="model-button"><span class="model-dot"></span>Local model <span class="tiny-arrow">↗</span></button><div class="sidebar-caption">Built for things you build.</div></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div class="breadcrumb">Projects <span>/</span> <strong id="project-name">Two-axis plotter</strong></div><div class="topbar-right"><span id="mode-pill" class="mode-pill"><span></span>Offline demo</span><button id="members-button" class="avatar-group" aria-label="Edit project members"><span>A</span><span>M</span><span>J</span></button></div></header>
+    <div class="content">
+      <div class="page-heading"><div><div class="eyebrow">PROJECT LEDGER <span class="slash">/</span> <span id="stage-label">01 — REVIEW</span></div><h1 id="page-title">Parts &amp; allocations</h1><p id="page-subtitle">Check the parts. Keep the source. Know who owes what.</p></div><button id="primary-action" class="button primary">Invoice preview <svg><use href="#i-arrow"/></svg></button></div>
+      <div id="connection-note" class="connection-note">Typed sample receipt · offline PayPal responses · no money moves.</div>
+      <section class="summary-grid" aria-label="Project totals"><div class="summary-box"><span>Receipt total</span><strong id="receipt-total">—</strong><small id="source-count">8 source lines</small></div><div class="summary-box"><span>Billable after review</span><strong id="billable-total">—</strong><small id="excluded-total">Nothing excluded yet</small></div><div class="summary-box review-summary"><span>Review progress</span><strong><span id="review-count">0</span><em id="review-denom"> / 8</em></strong><div class="progress-track"><div id="review-progress"></div></div></div><div class="summary-box"><span>Project members</span><strong>03</strong><small>Motion · controls · fabrication</small></div></section>
+      <nav class="mobile-tabs" aria-label="Workflow"><button data-view="review" class="active">Parts</button><button data-view="split">Split</button><button data-view="invoices">Invoices</button><button data-view="activity">Activity</button></nav>
+      <section id="review-view" class="view">
+        <div class="review-layout"><div class="parts-panel panel"><div class="panel-heading"><div><h2>Receipt items <span id="item-count" class="count-label">8</span></h2><p id="flag-summary">Checking source lines…</p></div><button id="source-button" class="button small secondary"><svg><use href="#i-doc"/></svg>Source files</button></div><div class="table-scroll"><table class="parts-table"><thead><tr><th class="row-number">#</th><th>Part / description</th><th>Qty</th><th class="amount-col">Amount</th><th>Cost owners</th><th>Review</th></tr></thead><tbody id="parts-body"></tbody></table></div><div class="table-footer"><span><span class="model-dot"></span>Suggestions from a local trained model</span><button id="approve-clear" class="text-button">Confirm clear suggestions <svg><use href="#i-check"/></svg></button></div></div>
+          <aside class="review-aside"><div class="attention-card"><div class="attention-top"><svg><use href="#i-tool"/></svg><span>CHECK BEFORE BILLING</span></div><h2 id="attention-title">A few parts need a closer look.</h2><p>New descriptions, repeated lines and BOM quantities stay visible until you review them.</p><div id="attention-list"></div></div><div class="mini-project"><div class="technical-drawing" aria-hidden="true"><svg viewBox="0 0 260 110"><g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M37 80h174V27H37zM44 73h160V34H44zM55 40v27m138-27v27M49 53h150M102 30v47M112 30v47M104 50h6v7h-6M34 84h183M46 90h146M37 10h174M37 7v9m174-9v9"/><circle cx="55" cy="40" r="3"/><circle cx="193" cy="40" r="3"/><path d="m31 80-5 5m185-5 5 5"/></g><text x="112" y="9" font-size="8" fill="currentColor">240 mm</text><text x="75" y="105" font-size="8" fill="currentColor">2-AXIS / REV. A</text></svg></div><span>THIS PROJECT</span><strong>Two-axis plotter</strong><p>A small build. A shared budget.<br>One traceable ledger.</p></div></aside></div>
+      </section>
+      <section id="split-view" class="view hidden"><div class="section-head"><div><h2>A share for every builder.</h2><p>Every cent is allocated once. Excluded source rows remain in the record.</p></div><button id="edit-members-split" class="button secondary small">Edit members</button></div><div id="member-cards" class="member-cards"></div><div class="panel split-proof"><h3>Allocation check</h3><div id="allocation-proof"></div></div></section>
+      <section id="invoices-view" class="view hidden"><div class="section-head"><div><h2>From approved split to invoices.</h2><p id="invoice-description">Drafts are created only after every source line is reviewed.</p></div><button id="create-invoices" class="button primary">Create reviewed drafts</button></div><div id="invoice-cards" class="invoice-cards"></div><div id="invoice-empty" class="empty-state"><svg><use href="#i-doc"/></svg><h3>No invoices yet</h3><p>Review the parts, check recipients and confirm the exact amounts.</p></div></section>
+      <section id="activity-view" class="view hidden"><div class="section-head"><div><h2>The decisions behind the total.</h2><p>Original model suggestions, review reasons and invoice changes stay in the record.</p></div><button id="export-button" class="button secondary small"><svg><use href="#i-down"/></svg>Export ledger</button></div><div id="activity-list" class="panel activity-list"></div></section>
+      <footer class="app-footer"><span>Amounts in USD · fictional project data</span><button id="reset-button" class="text-button">Start a fresh demo</button></footer>
+    </div>
+  </main>
+</div>
+<div id="drawer-backdrop" class="drawer-backdrop hidden"></div><aside id="review-drawer" class="review-drawer hidden" role="dialog" aria-modal="true" aria-labelledby="drawer-title"></aside>
+<dialog id="app-dialog"><div id="dialog-content"></div></dialog>
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+<div id="loading" class="loading hidden" role="status"><div></div><span>Updating the ledger…</span></div>
+<noscript><p>This application needs JavaScript to review and allocate parts.</p></noscript>
+</body></html>

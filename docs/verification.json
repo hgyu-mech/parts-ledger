@@ -1,0 +1,174 @@
+{
+  "checked_at_utc": "2026-10-11T03:57:25.012401+00:00",
+  "test_result": "pass",
+  "tests_run": 39,
+  "test_failures": 0,
+  "test_errors": 0,
+  "randomized_allocation_checks": 1500,
+  "model": {
+    "name": "Local parts classifier",
+    "algorithm": "Multinomial Naive Bayes with word and word-pair features",
+    "training_examples": 100,
+    "holdout_examples": 20,
+    "holdout_correct": 20,
+    "holdout_accuracy": 1.0,
+    "dataset": "Original synthetic descriptions with authored category labels, five categories",
+    "limitations": "Small English-domain model. Scores are not calibrated probabilities. Novel or ambiguous items require review; cost owners always require confirmation.",
+    "external_model_calls": 0
+  },
+  "fixture_workflow": {
+    "mode": "fixture",
+    "currency": "USD",
+    "receipt_cents": 11295,
+    "excluded_cents": 280,
+    "billable_cents": 11015,
+    "shares_cents": {
+      "alex": 5258,
+      "mina": 3269,
+      "jules": 2488
+    },
+    "unallocated_cents": 0,
+    "draft_statuses": [
+      "DRAFT",
+      "DRAFT",
+      "DRAFT"
+    ],
+    "issued_fixture_status": "SENT",
+    "simulated_payment_status": "PAID",
+    "runtime_ambiguous_item": {
+      "category": "electronics",
+      "confidence": 0.4021,
+      "coverage": 0.3333,
+      "needs_review": true,
+      "evidence_terms": [
+        "kit"
+      ],
+      "alternatives": [
+        {
+          "category": "electronics",
+          "score": 0.4021
+        },
+        {
+          "category": "fabrication",
+          "score": 0.1542
+        },
+        {
+          "category": "consumables",
+          "score": 0.1533
+        }
+      ],
+      "model": "local-multinomial-naive-bayes-v1"
+    },
+    "audit_events": 10
+  },
+  "actual_external_ai_calls": 0,
+  "actual_paypal_sandbox_api_calls": 0,
+  "sandbox_verification": "Automated local checks use mocked transport and make zero remote calls. Separate genuine Sandbox evidence in docs/sandbox-verification.json validates three create/send/post-send GET sequences returning SENT, an additional Alex refresh GET returning SENT, and the buyer-page source-item trail. Buyer payment is not verified.",
+  "source_sha256": {
+    "server.py": "d3d46351d5b5886f4c66b5d2aceb01fe2fb288152d48274a82c7d09e194a3c8b",
+    "model.py": "316429e0ef1335f0a46a53482ea0e405f3c6e0cec5116daadc9b52117b3ac5ea",
+    "ledger.py": "4f9a76f969f9e5f5c18dbd76820eda7e53bb9641ced999acb9730ce1e1c9c6e6",
+    "paypal_adapter.py": "24bb5cf2a73121c365e6580b181cad6d230be80639889acf5c8ff0bc3494f5a8",
+    "fixtures.py": "77a30580090b700c6b64109d12a70e44551c7886919ad7f7a3565e3f6c89c37d",
+    "training_data.json": "78f024be408f25a434df9a499af37dad7bbbc61757c8894298a4ad348bc30eb3",
+    "web/index.html": "6bf58cc5ddc490ae67ffe1fe6e00a3684a5b9b6d8fdf8ebe517ed8e70fbae992",
+    "web/style.css": "a5505179372a8b8e52665d0e3077b4453ec85b9d94a8d9b6dba99298e4a7ab0e",
+    "web/app.js": "c97593db8327defe4b38aaa1d72ca1d50b40c0f8ec4e59b9ccbde03906ab0412",
+    "tests/test_parts_ledger.py": "92638370c1eaacd1cc490668d502a31c9a2bcde8c176b54155a51bb7b364a4c4"
+  },
+  "record_scope": "Local suite and syntax results, current source hashes and historical fixture/model results only. Genuine Sandbox issuing/status evidence is recorded separately. No user purchase, savings, revenue, remote PAID result, live payment, public deployment or contest submission is claimed by this local record.",
+  "test_execution": {
+    "scope": "Local test suite and browser-script syntax only",
+    "full_suite_command": "python -B -m unittest discover -s tests",
+    "full_suite_result": "39 tests passed; reported by the project maintainer after the adapter and diagnostic changes",
+    "focused_adapter_and_diagnostic_tests": 10,
+    "focused_tests_result": "pass",
+    "browser_script_syntax_command": "node --check web/app.js",
+    "browser_script_syntax_result": "pass",
+    "execution_timestamp_utc": null
+  },
+  "fixture_workflow_checked_at_utc": "2026-10-11T02:45:24.884121+00:00",
+  "network_counts_scope": "Automated local checks only; these zero counts do not describe the separate credential-based browser Sandbox run.",
+  "source_hashes_scope": "Final source snapshot including email-card ellipsis/title and approve-clear toast-count presentation polish. The 39-test suite passed before those presentation edits; JavaScript syntax passed after them. Earlier automated fixture source hashes are preserved in historical_automated_run.",
+  "historical_automated_run": {
+    "checked_at_utc": "2026-10-11T02:45:24.884121+00:00",
+    "test_result": "pass",
+    "tests_run": 36,
+    "test_failures": 0,
+    "test_errors": 0,
+    "randomized_allocation_checks": 1500,
+    "model": {
+      "name": "Local parts classifier",
+      "algorithm": "Multinomial Naive Bayes with word and word-pair features",
+      "training_examples": 100,
+      "holdout_examples": 20,
+      "holdout_correct": 20,
+      "holdout_accuracy": 1.0,
+      "dataset": "Original synthetic descriptions with authored category labels, five categories",
+      "limitations": "Small English-domain model. Scores are not calibrated probabilities. Novel or ambiguous items require review; cost owners always require confirmation.",
+      "external_model_calls": 0
+    },
+    "fixture_workflow": {
+      "mode": "fixture",
+      "currency": "USD",
+      "receipt_cents": 11295,
+      "excluded_cents": 280,
+      "billable_cents": 11015,
+      "shares_cents": {
+        "alex": 5258,
+        "mina": 3269,
+        "jules": 2488
+      },
+      "unallocated_cents": 0,
+      "draft_statuses": [
+        "DRAFT",
+        "DRAFT",
+        "DRAFT"
+      ],
+      "issued_fixture_status": "SENT",
+      "simulated_payment_status": "PAID",
+      "runtime_ambiguous_item": {
+        "category": "electronics",
+        "confidence": 0.4021,
+        "coverage": 0.3333,
+        "needs_review": true,
+        "evidence_terms": [
+          "kit"
+        ],
+        "alternatives": [
+          {
+            "category": "electronics",
+            "score": 0.4021
+          },
+          {
+            "category": "fabrication",
+            "score": 0.1542
+          },
+          {
+            "category": "consumables",
+            "score": 0.1533
+          }
+        ],
+        "model": "local-multinomial-naive-bayes-v1"
+      },
+      "audit_events": 10
+    },
+    "actual_external_ai_calls": 0,
+    "actual_paypal_sandbox_api_calls": 0,
+    "sandbox_verification": "Mocked transport tests only; real credentials and execution still required.",
+    "source_sha256": {
+      "server.py": "d3d46351d5b5886f4c66b5d2aceb01fe2fb288152d48274a82c7d09e194a3c8b",
+      "model.py": "bc3ce9e712db3aaba2eca907c206f6aa2d10f44e73deb36028c6479ee47a16f2",
+      "ledger.py": "4f9a76f969f9e5f5c18dbd76820eda7e53bb9641ced999acb9730ce1e1c9c6e6",
+      "paypal_adapter.py": "931374324aec9caf5cfeafc2696531d51e1af5056fe3fe63626ce698c028f279",
+      "fixtures.py": "77a30580090b700c6b64109d12a70e44551c7886919ad7f7a3565e3f6c89c37d",
+      "training_data.json": "78f024be408f25a434df9a499af37dad7bbbc61757c8894298a4ad348bc30eb3",
+      "web/index.html": "6bf58cc5ddc490ae67ffe1fe6e00a3684a5b9b6d8fdf8ebe517ed8e70fbae992",
+      "web/style.css": "7320d9856f21db2d009e0b3870f9c580f581bf4e4bc2f10f5d37b06b1e841ba5",
+      "web/app.js": "9546ea469cc45480532bad3368fca853b708c43e62bfa19fde1e02463a20ddef",
+      "tests/test_parts_ledger.py": "fdb80c6f74acb839492a73dd751032adedbbb5139265d720e46d2945d274c3d3"
+    },
+    "record_scope": "Automated local checks. No user purchase, user savings, revenue, remote Sandbox transaction, public deployment or contest submission is claimed."
+  },
+  "remote_sandbox_evidence_file": "docs/sandbox-verification.json"
+}
