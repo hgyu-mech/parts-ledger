@@ -53,107 +53,245 @@ function owners(item) {
   return Object.keys(item.weights).map(id => state.members.find(m => m.id === id)).filter(Boolean);
 }
 
+let exceptionsOnly = false;
+
 function status(item) {
-  if (item.excluded) return '<span class="status-tag excluded">Excluded</span>';
-  if (item.reviewed) return `<span class="status-tag ok">${icon('check')}Reviewed</span>`;
-  if (item.flags.length) return '<span class="status-tag warning">Needs review</span>';
-  return '<span class="status-tag">Suggested</span>';
+  if (item.excluded) return '<span class="decision neutral">Excluded</span>';
+  if (item.reviewed) return '<span class="decision">Reviewed</span>';
+  if (item.flags.length) return '<span class="decision open">Needs review</span>';
+  return '<span class="decision neutral">Suggested</span>';
 }
 
 function setView(view) {
+  if (currentView !== view) closeEditor(false);
   currentView = view;
-  const labels = {
-    review:['01 — REVIEW','Parts & allocations','Check the parts. Keep the source. Know who owes what.'],
-    split:['02 — CHECK SPLIT','Who owes what','Trace each share back to the source parts.'],
-    invoices:['03 — INVOICES','Invoice status','Reviewed costs, distinct invoices, visible changes.'],
-    activity:['DECISION HISTORY','The full record','From the original source to the latest payment status.']
-  };
-  const label = labels[view];
-  $('#stage-label').textContent = label[0]; $('#page-title').textContent = label[1]; $('#page-subtitle').textContent = label[2];
   document.querySelectorAll('.view').forEach(el => el.classList.toggle('hidden', el.id !== view + '-view'));
-  document.querySelectorAll('[data-view]').forEach(el => el.classList.toggle('active', el.dataset.view === view));
-  $('#primary-action').textContent = view === 'invoices' ? 'Check cost split' : 'Invoice preview';
-  $('#primary-action').insertAdjacentHTML('beforeend', icon('arrow'));
+  document.querySelectorAll('[data-view]').forEach(el => {
+    const active = el.dataset.view === view;
+    el.classList.toggle('active',active);
+    if (active) el.setAttribute('aria-current','page');
+    else el.removeAttribute('aria-current');
+  });
+}
+
+function renderRows() {
+  const flagged = state.items.filter(i => i.flags.length && !i.reviewed);
+  $('#flag-summary').textContent = state.invoices.length
+    ? 'Review locked after invoice creation. See Activity for decisions.'
+    : state.totals.reviewed + ' of ' + state.items.length + ' reviewed · ' + flagged.length + ' open exceptions';
+  $('#exceptions').textContent = 'Exceptions (' + flagged.length + ')';
+  for (const [id,active] of [['#all-lines',!exceptionsOnly],['#exceptions',exceptionsOnly]]) {
+    $(id).classList.toggle('current',active); $(id).setAttribute('aria-pressed',String(active));
+  }
+  const items = exceptionsOnly ? flagged : state.items;
+  $('#parts-body').innerHTML = items.length ? items.map(item => `<tr class="${item.excluded ? 'line-excluded' : item.flags.length && !item.reviewed ? 'line-exception' : ''}">
+    <td class="line-ref">${escapeHTML(item.id)}</td>
+    <td><span class="line-main">${escapeHTML(item.description)}</span><span class="line-sub">${escapeHTML(state.categories[item.category])}</span><span class="mobile-facts">${item.quantity} × ${dollars(item.unit_cents)} · ${escapeHTML(owners(item).map(m => m.name).join(', ') || '—')}</span></td>
+    <td class="num">${item.quantity}</td><td class="num">${dollars(item.unit_cents)}</td><td class="num">${dollars(item.amount_cents)}</td>
+    <td><span class="owner-names">${escapeHTML(owners(item).map(m => m.name).join(', ') || '—')}</span></td>
+    <td>${status(item)}${item.flags.length && !item.reviewed ? '<small class="cell-sub">' + escapeHTML(item.flags.map(f=>f.label).join(' · ')) + '</small>' : ''}</td>
+    <td>${state.invoices.length ? '' : `<button type="button" class="text-button edit-link" data-part="${escapeHTML(item.id)}" aria-expanded="false" aria-label="Review ${escapeHTML(item.id)}: ${escapeHTML(item.description)}">Review</button>`}</td>
+    </tr>`).join('') : '<tr><td colspan="8">No open exceptions.</td></tr>';
+  $('#approve-clear').disabled = !!state.invoices.length || !state.items.some(i => !i.reviewed && !i.flags.length);
 }
 
 function render() {
   $('#project-name').textContent = state.title;
-  $('.mini-project>strong').textContent = state.title;
   $('#receipt-total').textContent = dollars(state.totals.receipt_cents);
   $('#billable-total').textContent = dollars(state.totals.billable_cents);
-  $('#source-count').textContent = `${state.items.length} preserved source lines`;
-  $('#excluded-total').textContent = state.totals.excluded_cents ? `${dollars(state.totals.excluded_cents)} excluded from billing` : 'Nothing excluded yet';
-  $('#review-count').textContent = state.totals.reviewed;
-  $('#review-denom').textContent = ' / ' + state.items.length;
-  $('#review-progress').style.width = `${state.totals.reviewed / Math.max(1,state.items.length) * 100}%`;
-  $('#nav-pending').textContent = state.totals.pending;
-  $('#item-count').textContent = state.items.length;
-  $('#flag-summary').textContent = state.totals.pending ? `${state.totals.flagged} flagged · ${state.totals.pending} lines awaiting confirmation` : 'Every source line reviewed. Ready to check the split.';
+  $('#excluded-total').textContent = state.totals.excluded_cents ? '− ' + dollars(state.totals.excluded_cents) : dollars(0);
   const sandbox = state.connection.mode === 'sandbox';
-  $('#mode-pill').innerHTML = `<span></span>${sandbox ? (state.connection.ready ? 'PayPal Sandbox' : 'Sandbox not configured') : 'Offline demo'}`;
-  $('#mode-pill').classList.toggle('sandbox', sandbox && state.connection.ready);
-  $('#connection-note').textContent = sandbox ? 'Sandbox test accounts only · no live PayPal endpoint · issue each invoice after confirmation.' : 'Typed sample receipt · offline PayPal responses · no money moves.';
-  $('#parts-body').innerHTML = state.items.map(item => `<tr data-part="${item.id}" tabindex="0" role="button" aria-label="Review ${escapeHTML(item.description)}" class="${selectedPart === item.id ? 'selected' : ''}"><td class="row-number">${item.id.slice(1)}</td><td><span class="part-title ${item.excluded ? 'excluded' : ''}">${escapeHTML(item.description)}</span><span class="part-category">${escapeHTML(state.categories[item.category])}<span class="confidence" title="Uncalibrated model score, not a certainty guarantee">· ${Math.round(item.model.confidence * 100)}%</span></span></td><td>${item.quantity}</td><td class="amount-col"><strong>${dollars(item.amount_cents)}</strong></td><td><div class="owner-chips">${owners(item).map(m => `<span class="owner-chip" title="${escapeHTML(m.name)}">${escapeHTML(m.name.slice(0,1))}</span>`).join('')}</div></td><td>${status(item)}</td></tr>`).join('');
-  const flagged = state.items.filter(i => i.flags.length && !i.reviewed);
-  $('#attention-title').textContent = flagged.length ? `${flagged.length} parts need a closer look.` : (state.totals.pending ? 'Confirm the suggested shares.' : 'The split is ready to check.');
-  $('#attention-list').innerHTML = flagged.map(i => `<button class="attention-item" data-part="${i.id}"><span>${i.id.slice(1)}</span><span><strong>${escapeHTML(i.description)}</strong><small>${escapeHTML(i.flags.map(f => f.label).join(' · '))}</small></span></button>`).join('');
-  $('#approve-clear').disabled = !!state.invoices.length || !state.items.some(i => !i.reviewed && !i.flags.length);
-  $('#source-button').disabled = !!state.invoices.length;
-  $('#members-button').disabled = !!state.invoices.length;
-  $('#edit-members-split').disabled = !!state.invoices.length;
+  $('#mode-pill').textContent = sandbox ? (state.connection.ready ? 'PayPal Sandbox' : 'Sandbox not configured') : 'Offline demo';
+  $('#connection-note').textContent = sandbox ? 'USD · PayPal Sandbox only' : 'USD · Sample receipt · No PayPal connection';
+  selectedPart = null;
+  renderRows();
+  for (const id of ['#source-button','#members-button','#edit-members-split']) $(id).disabled = !!state.invoices.length;
   renderSplit(); renderInvoices(); renderActivity(); setView(currentView);
 }
 
 function renderSplit() {
-  $('#member-cards').innerHTML = state.totals.members.map(share => `<article class="member-card"><div class="member-head"><span class="member-avatar">${escapeHTML(share.member.name.slice(0,1))}</span><div><h3>${escapeHTML(share.member.name)}</h3><p>${escapeHTML(share.member.role)}</p></div></div><div class="member-total">${dollars(share.amount_cents)}</div>${share.items.filter(i => i.share_cents).map(i => `<div class="share-line"><span>${escapeHTML(i.description)}<br><small>${escapeHTML(i.source_id)}</small></span><strong>${dollars(i.share_cents)}</strong></div>`).join('')}</article>`).join('');
-  const sum = state.totals.members.reduce((n, x) => n + x.amount_cents, 0);
-  $('#allocation-proof').innerHTML = `<div class="proof-row"><span>Original receipt</span><strong>${dollars(state.totals.receipt_cents)}</strong></div><div class="proof-row"><span>Reviewed exclusions</span><strong>− ${dollars(state.totals.excluded_cents)}</strong></div><div class="proof-row"><span>Allocated to members</span><strong>${dollars(sum)}</strong></div><div class="proof-row good"><span>Unallocated difference</span><strong>${dollars(state.totals.billable_cents - sum)}</strong></div><p>${state.totals.pending ? `${state.totals.pending} source lines still need review before invoicing.` : 'All source lines have a recorded decision. Shares conserve the total to the cent.'}</p>`;
+  const { members, receipt_cents, excluded_cents, billable_cents, pending } = state.totals;
+  const sharesByMember = members.map(({ items }) =>
+    new Map(items.map(({ source_id, share_cents }) => [source_id, share_cents]))
+  );
+  const memberHeadings = members.map(({ member }) =>
+    `<th scope="col" class="num">${escapeHTML(member.name)}</th>`
+  ).join('');
+  const rows = state.items.map(item => {
+    const shareCells = sharesByMember.map(shares => {
+      const cents = shares.get(item.id);
+      return `<td class="num">${cents === undefined ? '—' : dollars(cents)}</td>`;
+    }).join('');
+    return `<tr>
+      <td>${escapeHTML(item.id)}</td>
+      <th scope="row">${escapeHTML(item.description)}${item.excluded ? ' <small>Excluded</small>' : ''}</th>
+      <td class="num">${dollars(item.amount_cents)}</td>
+      ${shareCells}
+    </tr>`;
+  }).join('');
+  const memberTotals = members.map(({ amount_cents }) =>
+    `<td class="num">${dollars(amount_cents)}</td>`
+  ).join('');
+  $('#member-cards').innerHTML = `<div class="register-scroll"><table class="register-table" aria-label="Cost allocation by source line and member">
+    <thead><tr><th scope="col">Line</th><th scope="col">Part</th><th scope="col" class="num">Receipt</th>${memberHeadings}</tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot><tr><th scope="row" colspan="2">Totals</th><td class="num">${dollars(receipt_cents)}</td>${memberTotals}</tr></tfoot>
+  </table></div>`;
+  const allocated = members.reduce((sum, share) => sum + share.amount_cents, 0);
+  const readiness = pending
+    ? `${pending} source ${pending === 1 ? 'line needs' : 'lines need'} review before invoicing.`
+    : 'All source lines reviewed.';
+  $('#allocation-proof').innerHTML = `<p>Excluded ${dollars(excluded_cents)} · Billable ${dollars(billable_cents)} · Unallocated ${dollars(billable_cents - allocated)}</p><p>${readiness}</p>`;
 }
 
 function invoiceStatus(invoice) {
-  const tag = invoice.status === 'PAID' ? 'ok' : invoice.error ? 'warning' : '';
-  return `<span class="status-tag ${tag}">${escapeHTML(invoice.status)}${invoice.mode === 'fixture' ? ' · simulated' : ''}</span>`;
+  return escapeHTML(invoice.status) + (invoice.mode === 'fixture' ? ' · simulated' : '');
 }
 
 function renderInvoices() {
   const fixture = state.connection.mode === 'fixture';
-  $('#invoice-description').textContent = fixture ? 'Offline test invoices. Their status is simulated; no PayPal request is made.' : 'Draft, issue, pay with a Sandbox buyer account, then refresh the status from PayPal.';
-  $('#invoice-empty').classList.toggle('hidden', !!state.invoices.length);
-  $('#create-invoices').disabled = !state.totals.ready || (state.invoices.length && state.invoices.every(i => i.provider_id));
-  $('#create-invoices').textContent = state.invoices.some(i => !i.provider_id) ? 'Retry pending drafts' : 'Create reviewed drafts';
-  $('#invoice-cards').innerHTML = state.invoices.map(invoice => `<article class="invoice-card"><div class="member-head"><span class="member-avatar">${escapeHTML(invoice.member_name.slice(0,1))}</span><div><h3>${escapeHTML(invoice.member_name)}</h3><div class="email" title="${escapeHTML(invoice.recipient_email)}">${escapeHTML(invoice.recipient_email)}</div></div></div><div class="member-total">${dollars(invoice.amount_cents)}</div>${invoiceStatus(invoice)}<div class="provider-id">${escapeHTML(invoice.provider_id || 'No provider ID yet')}</div>${invoice.error ? `<div class="invoice-error">${escapeHTML(invoice.error)}</div>` : ''}<div class="invoice-actions">${invoice.status === 'DRAFT' ? `<button class="button primary" data-issue="${invoice.id}">${fixture ? 'Issue test invoice' : 'Issue Sandbox invoice'}</button>` : ''}${invoice.provider_id ? `<button class="button secondary" data-refresh="${invoice.id}">Refresh status</button>` : ''}${fixture && invoice.status === 'SENT' ? `<button class="button secondary" data-simulate="${invoice.id}">Simulate payment</button>` : ''}${!fixture && invoice.payment_url ? `<a class="button secondary" href="${escapeHTML(invoice.payment_url)}" target="_blank" rel="noopener noreferrer">Open Sandbox invoice ↗</a>` : ''}</div><div class="fixture-note">${fixture ? 'Fixture response · no real payment' : 'Sandbox API response · test money only'}</div></article>`).join('');
+  $('#invoice-description').textContent = fixture
+    ? 'Offline test invoices. Statuses are simulated.'
+    : 'Create drafts, issue each invoice, and refresh its status from PayPal Sandbox.';
+  $('#invoice-empty').classList.toggle('hidden', state.invoices.length > 0);
+  const hasPendingDraft = state.invoices.some(invoice => !invoice.provider_id);
+  $('#create-invoices').disabled = !state.totals.ready || (state.invoices.length > 0 && !hasPendingDraft);
+  $('#create-invoices').textContent = hasPendingDraft ? 'Retry pending drafts' : 'Create reviewed drafts';
+  if (!state.invoices.length) {
+    $('#invoice-cards').innerHTML = '';
+    return;
+  }
+  const rows = state.invoices.map(invoice => {
+    const id = escapeHTML(invoice.id);
+    const actions = [];
+    if (invoice.status === 'DRAFT') {
+      actions.push(`<button class="text-button" data-issue="${id}">${fixture ? 'Issue test invoice' : 'Issue Sandbox invoice'}</button>`);
+    }
+    if (invoice.provider_id) {
+      actions.push(`<button class="text-button" data-refresh="${id}">Refresh status</button>`);
+    }
+    if (fixture && invoice.status === 'SENT') {
+      actions.push(`<button class="text-button" data-simulate="${id}">Simulate payment</button>`);
+    }
+    if (!fixture && invoice.payment_url) {
+      actions.push(`<a class="button secondary small" href="${escapeHTML(invoice.payment_url)}" target="_blank" rel="noopener noreferrer">Open Sandbox invoice ↗</a>`);
+    }
+    return `<tr>
+      <th scope="row">${escapeHTML(invoice.member_name)}<br><small>${escapeHTML(invoice.recipient_email)}</small></th>
+      <td class="num">${dollars(invoice.amount_cents)}</td>
+      <td>${invoiceStatus(invoice)}${invoice.error ? `<br><small class="invoice-error">${escapeHTML(invoice.error)}</small>` : ''}</td>
+      <td>${escapeHTML(invoice.provider_id || 'Pending')}<br><small>${invoice.mode === 'fixture' ? 'Offline fixture' : 'PayPal Sandbox'}</small></td>
+      <td><div class="register-actions">${actions.join(' ')}</div></td>
+    </tr>`;
+  }).join('');
+  $('#invoice-cards').innerHTML = `<div class="register-scroll"><table class="register-table" aria-label="Invoice register">
+    <thead><tr><th scope="col">Recipient</th><th scope="col" class="num">Amount</th><th scope="col">Status</th><th scope="col">Reference</th><th scope="col">Actions</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
 }
 
 function renderActivity() {
-  const names = {source_imported:'Receipt classified', part_reviewed:'Part reviewed', clear_suggestions_confirmed:'Clear suggestions confirmed', member_details_updated:'Project members updated', invoice_draft_created:'Invoice draft created', invoice_create_failed:'Invoice creation needs attention', invoice_status_changed:'Invoice status changed', invoice_status_checked:'Invoice status checked'};
-  $('#activity-list').innerHTML = [...state.audit].reverse().map(ev => {
-    let detail = '';
-    if (ev.kind === 'part_reviewed') detail = `${ev.detail.source_id} · ${ev.detail.after.excluded ? 'Excluded' : state.categories[ev.detail.after.category]} · ${ev.detail.after.reason}`;
-    if (ev.kind === 'source_imported') detail = `${ev.detail.lines} source lines · the original text and checksums are retained.`;
-    if (ev.kind === 'clear_suggestions_confirmed') detail = ev.detail.source_ids.join(', ') + ' · categories and cost owners confirmed.';
-    if (ev.kind.startsWith('invoice_')) detail = `${ev.detail.member_id || ''}${ev.detail.before ? ' · ' + ev.detail.before + ' → ' + ev.detail.after : ''} · ${ev.detail.mode || ''}${ev.detail.error ? ' · ' + ev.detail.error : ''}`;
-    return `<article class="activity-event"><time datetime="${ev.time}">${escapeHTML(new Date(ev.time).toLocaleString('en-US', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}))}</time><div><h3>${escapeHTML(names[ev.kind] || ev.kind)}</h3><p>${escapeHTML(detail)}</p><details><summary>Inspect record</summary><pre>${escapeHTML(JSON.stringify(ev.detail,null,2))}</pre></details></div></article>`;
+  const names = {
+    source_imported: 'Receipt classified',
+    part_reviewed: 'Part reviewed',
+    clear_suggestions_confirmed: 'Suggestions confirmed',
+    member_details_updated: 'Project members updated',
+    invoice_draft_created: 'Invoice draft created',
+    invoice_create_failed: 'Invoice creation needs attention',
+    invoice_status_changed: 'Invoice status changed',
+    invoice_status_checked: 'Invoice status checked'
+  };
+  const rows = [...state.audit].reverse().map(event => {
+    const detail = event.detail;
+    let description = '';
+    if (event.kind === 'part_reviewed') {
+      const category = detail.after.excluded ? 'Excluded' : state.categories[detail.after.category];
+      description = [detail.source_id, category, detail.after.reason].filter(Boolean).join(' · ');
+    } else if (event.kind === 'source_imported') {
+      description = `${detail.lines} receipt lines imported. Import checksums are recorded below.`;
+    } else if (event.kind === 'clear_suggestions_confirmed') {
+      description = detail.source_ids.join(', ');
+    } else if (event.kind.startsWith('invoice_')) {
+      const transition = detail.before ? `${detail.before} → ${detail.after}` : '';
+      const mode = detail.mode === 'fixture' ? 'Offline fixture' : detail.mode === 'sandbox' ? 'PayPal Sandbox' : detail.mode;
+      description = [detail.member_id, transition, mode, detail.error].filter(Boolean).join(' · ');
+    }
+    const time = new Date(event.time).toLocaleString('en-US', {
+      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+    return `<tr>
+      <td><time datetime="${escapeHTML(event.time)}">${escapeHTML(time)}</time></td>
+      <th scope="row">${escapeHTML(names[event.kind] || event.kind)}</th>
+      <td>
+        ${description ? `<div>${escapeHTML(description)}</div>` : ''}
+        <details><summary>Inspect record</summary><pre>${escapeHTML(JSON.stringify(detail, null, 2))}</pre></details>
+      </td>
+    </tr>`;
   }).join('');
+  $('#activity-list').innerHTML = `<div class="register-scroll"><table class="register-table" aria-label="Activity register">
+    <thead><tr><th scope="col">Time</th><th scope="col">Event</th><th scope="col">Record</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
 }
 
-function closeDrawer() {
-  $('#review-drawer').classList.add('hidden'); $('#drawer-backdrop').classList.add('hidden'); document.body.style.overflow=''; selectedPart=null;
+function closeEditor(restoreFocus = true) {
+  const id = selectedPart;
+  const trigger = id && document.querySelector(`[data-part="${id}"]`);
+  $('#inline-review')?.closest('tr').remove();
+  trigger?.closest('tr').classList.remove('line-selected');
+  trigger?.setAttribute('aria-expanded','false');
+  trigger?.removeAttribute('aria-controls');
+  selectedPart = null;
+  if (restoreFocus) trigger?.focus({preventScroll:true});
 }
 
 function openPart(id) {
-  if (state.invoices.length) { toast('This allocation is locked to its invoices. Inspect the source decisions in Activity.'); setView('activity'); return; }
-  const item = state.items.find(i => i.id === id); if (!item) return;
+  if (actionPending || state.invoices.length) return;
+  if (selectedPart === id) { closeEditor(); return; }
+  closeEditor(false);
+  const item = state.items.find(i => i.id === id);
+  const trigger = document.querySelector(`[data-part="${id}"]`);
+  if (!item || !trigger) return;
   selectedPart = id;
-  const originalCSV = state.sources.receipt.split('\n')[item.source_line-1] || '';
-  $('#review-drawer').innerHTML = `<div class="drawer-top"><div><div class="eyebrow">SOURCE ${item.id} · LINE ${item.source_line}</div><h2 id="drawer-title">Review this part</h2></div><button id="drawer-close" class="icon-button" aria-label="Close review">${icon('close')}</button></div><div class="source-row"><small>ORIGINAL RECEIPT ROW</small><strong>${escapeHTML(item.description)}</strong><code>${escapeHTML(originalCSV)}</code><div class="source-numbers"><span>Quantity<b>${item.quantity}</b></span><span>Unit price<b>${dollars(item.unit_cents)}</b></span><span>Line total<b>${dollars(item.amount_cents)}</b></span></div></div><div class="flag-list">${item.flags.map(f => `<span class="status-tag warning">${escapeHTML(f.label)}</span>`).join('')}</div><form id="review-form"><label class="field"><span>Part category</span><select id="review-category">${Object.entries(state.categories).map(([key,label]) => `<option value="${key}" ${key===item.category?'selected':''}>${escapeHTML(label)}</option>`).join('')}</select></label><div class="model-explanation">Model suggestion: ${escapeHTML(state.categories[item.model.category])} · score ${Math.round(item.model.confidence*100)}%.<br>${item.model.evidence_terms.length ? 'Supporting terms: ' + escapeHTML(item.model.evidence_terms.join(', ')) : 'No familiar terms; choose the category yourself.'}</div><div class="field"><span>Who uses this part?</span><div class="owner-picker">${state.members.map(m => `<label class="owner-choice"><input type="checkbox" name="owner" value="${m.id}" ${item.weights[m.id]?'checked':''}>${escapeHTML(m.name)}</label>`).join('')}</div><small>Selected members share this line equally. Odd cents are allocated once.</small></div><label class="field"><span>Review reason</span><textarea id="review-reason" placeholder="What did you check? Why this category or split?" minlength="8" maxlength="400" required>${escapeHTML(item.reason)}</textarea><small>Record the decision; the original model suggestion stays unchanged.</small></label><label class="review-options"><input type="checkbox" id="review-excluded" ${item.excluded?'checked':''}><span>Exclude this source row from billing.<br><small>Keep it in the ledger with the reason above.</small></span></label><button class="button primary drawer-save" type="submit">Save reviewed decision ${icon('check')}</button></form><div class="drawer-action-note">A review decision does not create or issue an invoice.</div>`;
-  $('#review-drawer').classList.remove('hidden'); $('#drawer-backdrop').classList.remove('hidden'); document.body.style.overflow='hidden';
-  $('#drawer-close').onclick=closeDrawer;
+  const originalCSV = state.sources.receipt.split(/\r\n|\r|\n/)[item.source_line-1] || '';
+  const row = document.createElement('tr'); row.className = 'editor-row';
+  row.innerHTML = `<td colspan="8"><section id="inline-review" class="inline-review" aria-labelledby="line-review-title">
+    <header class="editor-title"><h3 id="line-review-title">${escapeHTML(id)} · ${escapeHTML(item.description)}</h3><button id="review-close" type="button" class="text-button">Close</button></header>
+    <div class="editor-grid">
+      <div class="source-facts">
+        <h4>Original receipt · line ${item.source_line}</h4><code>${escapeHTML(originalCSV)}</code>
+        <p>${item.quantity} × ${dollars(item.unit_cents)} = <strong>${dollars(item.amount_cents)}</strong></p>
+        ${item.flags.map(f => '<p class="source-exception">'+escapeHTML(f.label)+'</p>').join('')}
+        <p>Model suggestion: <strong>${escapeHTML(state.categories[item.model.category])}</strong> · score ${Math.round(item.model.confidence*100)}%${item.model.evidence_terms.length ? ' · ' + escapeHTML(item.model.evidence_terms.join(', ')) : ''}</p>
+      </div>
+      <form id="review-form" class="edit-fields">
+        <label class="field"><span>Reviewed category</span><select id="review-category">${Object.entries(state.categories).map(([key,label]) => `<option value="${escapeHTML(key)}" ${key===item.category?'selected':''}>${escapeHTML(label)}</option>`).join('')}</select></label>
+        <fieldset><legend>Cost owners (equal shares)</legend><div class="owner-picker">${state.members.map(m => `<label><input type="checkbox" name="owner" value="${escapeHTML(m.id)}" ${item.weights[m.id]?'checked':''}>${escapeHTML(m.name)}</label>`).join('')}</div></fieldset>
+        <label class="field wide"><span>Review reason</span><textarea id="review-reason" rows="2" minlength="8" maxlength="400" required>${escapeHTML(item.reason)}</textarea></label>
+        <p id="review-error" class="invoice-error hidden wide" role="alert"></p>
+        <div class="editor-actions wide"><label class="review-options"><input type="checkbox" id="review-excluded" ${item.excluded?'checked':''}>Exclude this line from billing</label><button class="button primary" id="review-save" type="submit">Save decision</button></div>
+      </form>
+    </div>
+  </section></td>`;
+  trigger.closest('tr').classList.add('line-selected');
+  trigger.setAttribute('aria-expanded','true'); trigger.setAttribute('aria-controls','inline-review');
+  trigger.closest('tr').after(row);
+  $('#review-close').onclick=()=>closeEditor();
   $('#review-form').onsubmit=async ev=>{
     ev.preventDefault();
-    const weights={}; document.querySelectorAll('input[name="owner"]:checked').forEach(n=>weights[n.value]=1);
-    try {await action('review',{item_id:id,category:$('#review-category').value,weights,reason:$('#review-reason').value,excluded:$('#review-excluded').checked},'Review decision saved. Original source retained.');closeDrawer();}catch{}
+    const weights={}; row.querySelectorAll('input[name="owner"]:checked').forEach(n=>weights[n.value]=1);
+    const submit=$('#review-save'); submit.disabled=true;
+    const notice=$('#review-error'); notice.classList.add('hidden');
+    try {
+      await action('review',{item_id:id,category:$('#review-category').value,weights,reason:$('#review-reason').value,excluded:$('#review-excluded').checked},'Decision saved.');
+      (document.querySelector(`[data-part="${id}"]`) || $('#exceptions')).focus({preventScroll:true});
+    } catch (error) {
+      if (notice.isConnected) { notice.textContent=error.message; notice.classList.remove('hidden'); }
+    } finally { if (submit.isConnected) submit.disabled=false; }
   };
-  $('#review-category').focus();
+  $('#review-category').focus({preventScroll:true});
+  const bounds=row.getBoundingClientRect();
+  if (bounds.bottom > window.innerHeight - 16) $('#inline-review').scrollIntoView({block:'nearest',inline:'nearest'});
 }
 
 function dialog(title, body, actions='') {
@@ -163,7 +301,7 @@ function dialog(title, body, actions='') {
 }
 
 function sourceDialog() {
-  dialog('Keep the source in view',`<p class="dialog-description">Paste a typed receipt and an optional bill of materials. Only these source lines are classified; no amount is invented by the model.</p><form id="source-form"><label class="field"><span>Project name</span><input id="source-title" value="${escapeHTML(state.title)}" maxlength="100" required></label><label class="field"><span>Receipt CSV · description,quantity,unit_price</span><textarea class="source-editor" id="source-receipt" required>${escapeHTML(state.sources.receipt)}</textarea></label><label class="field"><span>Optional BOM CSV · description,quantity</span><textarea class="source-editor bom" id="source-bom">${escapeHTML(state.sources.bom)}</textarea></label><p>Importing replaces the current review decisions. Original text and new source checksums will be retained.</p><div class="dialog-actions"><button type="submit" class="button primary">Run local model ${icon('arrow')}</button></div></form>`);
+  dialog('Source files',`<p class="dialog-description">Paste a typed receipt and an optional bill of materials. Only these source lines are classified; no amount is invented by the model.</p><form id="source-form"><label class="field"><span>Project name</span><input id="source-title" value="${escapeHTML(state.title)}" maxlength="100" required></label><label class="field"><span>Receipt CSV · description,quantity,unit_price</span><textarea class="source-editor" id="source-receipt" required>${escapeHTML(state.sources.receipt)}</textarea></label><label class="field"><span>Optional BOM CSV · description,quantity</span><textarea class="source-editor bom" id="source-bom">${escapeHTML(state.sources.bom)}</textarea></label><p>Importing replaces the current CSV text and clears its review decisions. Activity keeps the checksums from earlier imports.</p><div class="dialog-actions"><button type="submit" class="button primary">Import and classify</button></div></form>`);
   $('#source-form').onsubmit=async ev=>{ev.preventDefault();try{await action('import',{title:$('#source-title').value,receipt:$('#source-receipt').value,bom:$('#source-bom').value},'Sources imported and classified locally.');$('#app-dialog').close();}catch{}};
 }
 
@@ -188,8 +326,10 @@ function issueInvoiceDialog(id) {
   $('#issue-submit').onclick=async()=>{try{await action('send_invoice',{invoice_id:id,confirmed:true},'Invoice issued. Payment status remains separate.');$('#app-dialog').close();}catch{}};
 }
 
-$('#drawer-backdrop').onclick=closeDrawer;
-document.addEventListener('keydown',ev=>{if(ev.key==='Escape')closeDrawer();if((ev.key==='Enter'||ev.key===' ')&&ev.target.matches('tr[data-part]')){ev.preventDefault();openPart(ev.target.dataset.part);}});
+$('#all-lines').onclick=()=>{ if (!state || actionPending) return; closeEditor(false); exceptionsOnly=false; renderRows(); };
+$('#exceptions').onclick=()=>{ if (!state || actionPending) return; closeEditor(false); exceptionsOnly=true; renderRows(); };
+document.addEventListener('keydown',ev=>{ if (ev.key==='Escape' && selectedPart && !$('#app-dialog').open) closeEditor(); });
+
 document.addEventListener('click',ev=>{
   const target=ev.target.closest('[data-view],[data-part],[data-issue],[data-refresh],[data-simulate]');if(!target)return;
   if(target.dataset.view)setView(target.dataset.view);
@@ -201,7 +341,7 @@ document.addEventListener('click',ev=>{
 $('#source-button').onclick=sourceDialog;
 $('#members-button').onclick=membersDialog;$('#edit-members-split').onclick=membersDialog;
 $('#approve-clear').onclick=async()=>{try{await action('approve_clear');toast(state.totals.pending ? `${state.totals.pending} source lines still need review.` : 'All source lines reviewed. The cost split is ready.');}catch{}};
-$('#primary-action').onclick=()=>{if(currentView==='invoices'){setView('split');return;}setView('split');if(!state.totals.ready)toast('Check the split now; finish the flagged reviews before creating invoices.');};
+$('#primary-action').onclick=()=>setView('split');
 $('#create-invoices').onclick=createInvoiceDialog;
 $('#reset-button').onclick=()=>{dialog('Start a fresh sample project',`<p class="dialog-description">The current project is archived locally. A new fictional parts receipt and BOM will be loaded. Existing Sandbox invoices are not deleted or cancelled.</p>`,`<button id="reset-confirm" class="button primary">Start fresh demo</button>`);$('#reset-confirm').onclick=async()=>{try{await action('reset',{},'Fresh sample project loaded.');$('#app-dialog').close();setView('review');}catch{}};};
 $('#model-info').onclick=()=>dialog('How the suggestions work',`<p class="dialog-description">A local statistical model is trained on ${state.model.training_examples} original, labelled workshop descriptions. It classifies the text at runtime; a fixed lookup table does not supply its predictions.</p><div class="model-facts"><span>Algorithm<strong>Naive Bayes</strong></span><span>External model calls<strong>0</strong></span><span>Training examples<strong>${state.model.training_examples}</strong></span><span>Authored holdout checks<strong>${state.model.holdout_correct} / ${state.model.holdout_examples}</strong></span></div><p>${escapeHTML(state.model.limitations)}</p><p style="margin-top:14px">BOM matching, duplicate checks, owner defaults and cent arithmetic are deterministic helpers, not claimed as AI. You confirm every cost decision before an invoice can be created.</p>`);

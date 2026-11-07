@@ -47,12 +47,17 @@ def read_csv(text, bom=False):
         raise LedgerError("A source must be CSV text, at most 50,000 characters.")
     if not text.strip():
         return []
-    reader = csv.DictReader(io.StringIO(text))
+    reader = csv.DictReader(io.StringIO(text, newline=""))
     expected = {"description", "quantity"} | (set() if bom else {"unit_price"})
     if not reader.fieldnames or not expected.issubset(set(reader.fieldnames)):
         raise LedgerError("CSV headers must include " + ", ".join(sorted(expected)) + ".")
+    physical_lines = re.split(r"\r\n|\r|\n", text)
+    number = reader.line_num + 1
     rows = []
-    for number, row in enumerate(reader, 2):
+    for row in reader:
+        # DictReader skips empty records. Keep the starting physical line of each row.
+        while number < reader.line_num and not physical_lines[number - 1]:
+            number += 1
         description = (row.get("description") or "").strip()
         qty = (row.get("quantity") or "").strip()
         if not description or len(description) > 127 or "\n" in description or "\r" in description or not re.fullmatch(r"\d{1,6}", qty) or not 0 < int(qty) <= 100_000:
@@ -66,6 +71,7 @@ def read_csv(text, bom=False):
         rows.append(item)
         if len(rows) > 40:
             raise LedgerError("This prototype accepts up to 40 parts per source.")
+        number = reader.line_num + 1
     return rows
 
 
@@ -182,7 +188,11 @@ class LedgerStore:
             state = new_state(self.classifier)
             self.save(session, state)
             return state
-        return json.loads(path.read_text(encoding="utf-8"))
+        state = json.loads(path.read_text(encoding="utf-8"))
+        # Older projects stored record indexes rather than physical line numbers.
+        for item, source in zip(state["items"], read_csv(state["sources"]["receipt"])):
+            item["source_line"] = source["source_line"]
+        return state
 
     def save(self, session, state):
         path = self.path(session)

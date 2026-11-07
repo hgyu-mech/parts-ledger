@@ -66,6 +66,10 @@ class MoneyAndParsingTests(unittest.TestCase):
         self.assertEqual(row['description'],'Bolt, stainless')
         self.assertEqual(row['amount_cents'],52)
 
+    def test_receipt_positions_count_blank_physical_lines(self):
+        receipt = 'description,quantity,unit_price\r\n\r\n"Bolt, stainless",4,0.13\r\n\r\nMotor,2,1.00'
+        self.assertEqual([row['source_line'] for row in read_csv(receipt)], [3, 5])
+
     def test_multiline_descriptions_rejected_to_preserve_source_row_links(self):
         with self.assertRaises(LedgerError):read_csv('description,quantity,unit_price\n"two\nlines",1,1.00')
 
@@ -113,6 +117,21 @@ class WorkflowTests(unittest.TestCase):
         state=self.store.get(self.sid)
         with self.assertRaises(LedgerError):self.store.mutate(self.sid,'create_invoices',{'revision':state['revision'],'confirmed':True})
         self.assertEqual(self.store.get(self.sid)['invoices'],[])
+
+    def test_existing_receipt_positions_are_corrected_on_load(self):
+        state = self.store.get(self.sid)
+        receipt = 'description,quantity,unit_price\n\n"Bolt, stainless",4,0.13'
+        state = self.store.mutate(self.sid, 'import', {'revision':state['revision'], 'receipt':receipt})
+        state = self.store.mutate(self.sid, 'review', {'revision':state['revision'], 'item_id':'L01', 'reason':'Verified against the supplied receipt.'})
+        persisted = self.store.load(self.sid)
+        persisted['items'][0]['source_line'] = 2
+        self.store.save(self.sid, persisted)
+
+        restored = self.store.get(self.sid)
+        self.assertEqual(restored['items'][0]['source_line'], 3)
+        self.assertTrue(restored['items'][0]['reviewed'])
+        self.assertEqual(restored['sources']['receipt'], receipt)
+        self.assertEqual(restored['revision'], state['revision'])
 
     def test_clear_confirmation_never_accepts_flags(self):
         state=self.store.get(self.sid)
